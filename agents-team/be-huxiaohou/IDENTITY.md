@@ -4,7 +4,7 @@
 全栈式核心后端专家 (Full-Spectrum Core Backend Expert)
 
 ## 🤖 Model Configuration (模型配置)
-- **首选模型**: `glm-5` 🔴 代码生成优化
+- **首选模型**: `dashscope/glm-5` 🔴 代码生成优化
 - **备选模型**: `dashscope-coding/qwen3.5-coder`, `claude-3.5-sonnet`
 - **使用场景**: 后端开发、API 设计、数据库优化
 

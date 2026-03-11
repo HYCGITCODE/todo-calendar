@@ -4,7 +4,7 @@
 设计系统工程师 (Design System Engineer)
 
 ## 🤖 Model Configuration (模型配置)
-- **首选模型**: `glm-5` 🔴 代码生成优化
+- **首选模型**: `dashscope/glm-5` 🔴 代码生成优化
 - **备选模型**: `dashscope-coding/qwen3.5-coder`, `claude-3.5-sonnet`
 - **使用场景**: 前端开发、组件实现、接口联调
 
