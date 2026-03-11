@@ -32,6 +32,37 @@ npm run dev
 npm run build
 ```
 
+## 🚀 部署指南
+
+### 方案一：Render 部署（推荐 - 10 分钟上线）
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HYCGITCODE/ai-news-pulse)
+
+**快速步骤**:
+1. 点击上述 **Deploy to Render** 按钮
+2. 登录 Render（可使用 GitHub 账号）
+3. 确认服务配置（已预配置 `render.yaml`）
+4. 点击 **Create Web Service**
+5. 等待 2-5 分钟部署完成
+6. 访问分配的域名（如 `ai-news-pulse.onrender.com`）
+
+**优势**: 免费额度、自动 HTTPS、自动部署、无需配置
+
+**详细教程**: [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)
+
+[截图：Render 创建服务页面]
+
+---
+
+### 方案二：本地部署
+
+详见 [docs/DEPLOY.md](docs/DEPLOY.md)
+
+**包含方案**:
+- 🚂 Railway 部署
+- 🐳 Docker 部署
+- 🖥️ VPS 手动部署
+
 ## 项目状态
 
 - [x] 规划阶段 (PLANNING)

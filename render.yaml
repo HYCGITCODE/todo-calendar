@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ai-news-pulse
+    env: node
+    buildCommand: cd backend && npm install && cd ../frontend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    plan: free
+    region: oregon
+    branch: master
+    autoDeploy: true
