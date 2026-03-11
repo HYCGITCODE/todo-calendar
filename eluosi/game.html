@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄罗斯方块</title>
+<style>
+body{margin:0;padding:20px;font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;min-height:100vh}
+.game{background:white;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+h1{text-align:center;color:#667eea;margin-bottom:20px}
+.info{display:flex;justify-content:space-between;margin-bottom:20px;gap:20px}
+.info-box{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:15px 25px;border-radius:10px;text-align:center;flex:1}
+.info-box h3{font-size:.9em;margin-bottom:5px;opacity:.9}
+.info-box p{font-size:1.5em;font-weight:bold}
+canvas{border:4px solid #667eea;border-radius:10px;background:#1a1a2e;display:block;margin:0 auto}
+.controls{margin-top:20px;background:#f8f9fa;padding:20px;border-radius:10px}
+.controls h3{color:#667eea;margin-bottom:15px;text-align:center}
+.key{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:5px 12px;border-radius:5px;font-weight:bold;display:inline-block;margin:5px}
+.game-over{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:40px;border-radius:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:1000}
+.game-over h2{color:#e74c3c;font-size:2em;margin-bottom:20px}
+.game-over button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:15px 40px;font-size:1.2em;border-radius:10px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="game">
+<h1>🎮 俄罗斯方块</h1>
+<div class="info">
+<div class="info-box"><h3>得分</h3><p id="score">0</p></div>
+<div class="info-box"><h3>等级</h3><p id="level">1</p></div>
+<div class="info-box"><h3>消除</h3><p id="lines">0</p></div>
+</div>
+<canvas id="game" width="300" height="600"></canvas>
+<div class="controls">
+<h3>控制：← → 移动 | ↑ 旋转 | ↓ 加速 | Space 掉落 | P 暂停 | R 重玩</h3>
+</div>
+</div>
+<div class="game-over" id="go"><h2>游戏结束!</h2><p>得分：<span id="fs">0</span></p><button onclick="restart()">重新开始</button></div>
+<script>
+const C=10,R=20,S=30,CO=[null,'#0ff','#00f','#fa0','#ff0','#0f0','#a0f','#f00'];
+const SH=[null,[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+[[2,0,0],[2,2,2],[0,0,0]],[[0,0,3],[3,3,3],[0,0,0]],[[4,4],[4,4]],
+[[0,5,5],[5,5,0],[0,0,0]],[[0,6,0],[6,6,6],[0,0,0]],[[7,7,0],[0,7,7],[0,0,0]]];
+let bd=[],sc=0,lv=1,ln=0,go=false,pa=false,cur,nxt;
+const cv=document.getElementById('game'),cx=cv.getContext('2d');
+function init(){bd=Array.from({length:R},()=>Array(C).fill(0));sc=0;lv=1;ln=0;go=false;pa=false;upd();document.getElementById('go').style.display='none';nxt=mkP();sp();}
+function mkP(){const t=Math.floor(Math.random()*7)+1;return{t:t,s:SH[t],x:Math.floor(C/2)-Math.floor(SH[t][0].length/2),y:0};}
+function sp(){cur=nxt;nxt=mkP();cur.x=Math.floor(C/2)-Math.floor(cur.s[0].length/2);cur.y=0;if(col(cur)){go=true;document.getElementById('fs').textContent=sc;document.getElementById('go').style.display='block';}}
+function col(p){for(let r=0;r<p.s.length;r++)for(let c=0;c<p.s[r].length;c++)if(p.s[r][c]){let nx=p.x+c,ny=p.y+r;if(nx<0||nx>=C||ny>=R)return true;if(ny>=0&&bd[ny][nx])return true;}return false;}
+function rot(){const ro={...cur,s:cur.s[0].map((_,i)=>cur.s.map(r=>r[i]).reverse())};if(!col(ro))cur=ro;}
+function mv(d){cur.x+=d;if(col(cur))cur.x-=d;}
+function dr(){cur.y++;if(col(cur)){cur.y--;mg();clr();sp();}}
+function hd(){while(!col({...cur,y:cur.y+1})){cur.y++;sc+=2;}dr();upd();}
+function mg(){for(let r=0;r<cur.s.length;r++)for(let c=0;c<cur.s[r].length;c++)if(cur.s[r][c]){let y=cur.y+r,x=cur.x+c;if(y>=0)bd[y][x]=cur.t;}}
+function clr(){let lc=0;for(let r=R-1;r>=0;r--)if(bd[r].every(c=>c!==0)){bd.splice(r,1);bd.unshift(Array(C).fill(0));lc++;r++;}if(lc>0){const pts=[0,100,300,500,800];sc+=pts[lc]*lv;ln+=lc;lv=Math.floor(ln/10)+1;upd();}}
+function upd(){document.getElementById('score').textContent=sc;document.getElementById('level').textContent=lv;document.getElementById('lines').textContent=ln;}
+function draw(){cx.fillStyle='#1a1a2e';cx.fillRect(0,0,cv.width,cv.height);cx.strokeStyle='#2a2a3e';for(let r=0;r<R;r++)for(let c=0;c<C;c++)cx.strokeRect(c*S,r*S,S,S);for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(bd[r][c]){db(cx,c,r,CO[bd[r][c]]);}if(cur){for(let r=0;r<cur.s.length;r++)for(let c=0;c<cur.s[r].length;c++)if(cur.s[r][c])db(cx,cur.x+c,cur.y+r,CO[cur.t]);}}
+function db(ctx,x,y,col){ctx.fillStyle=col;ctx.fillRect(x*S,y*S,S-1,S-1);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(x*S,y*S,S-1,3);ctx.fillRect(x*S,y*S,3,S-1);}
+document.addEventListener('keydown',e=>{if(go)return;switch(e.key){case'ArrowLeft':mv(-1);break;case'ArrowRight':mv(1);break;case'ArrowUp':rot();break;case'ArrowDown':dr();sc++;upd();break;case' ':hd();break;case'p':case'P':pa=!pa;break;case'r':case'R':restart();break;}if(!pa)draw();});
+function restart(){init();}
+function loop(t){let iv=1000-(lv-1)*100;if(!go&&!pa){if(!lt||t-lt>Math.max(100,iv)){dr();lt=t;}draw();}requestAnimationFrame(loop);}let lt=0;init();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
