@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from contextlib import contextmanager
 
-from src.models.task import Task
-from src.models.category import Category
+# 先导入 Base，再导入模型
+from src.models import Base, Task, Category, RecurringTask
 
 
 # 数据库配置
@@ -27,7 +27,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_database():
     """初始化数据库，创建所有表"""
-    from src.models.task import Base
     Base.metadata.create_all(bind=engine)
     
     # 初始化默认分类
