@@ -124,11 +124,21 @@ class TaskListWidget(QListWidget):
     
     def _delete_task(self, task_id):
         """删除任务"""
-        if self.task_service.delete_task(task_id):
-            self.load_tasks(self.task_service.get_tasks_by_date(
-                self.task_service.get_task(task_id).due_date if self.task_service.get_task(task_id) 
-                else QDate.currentDate().toPyDate()
-            ))
+        try:
+            # 先获取任务信息（在删除前）
+            task = self.task_service.get_task(task_id)
+            due_date = task.due_date if task else None
+            
+            # 删除任务
+            if self.task_service.delete_task(task_id):
+                # 重新加载任务列表
+                if due_date:
+                    self.load_tasks(self.task_service.get_tasks_by_date(due_date))
+                else:
+                    # 如果任务不存在，刷新当前视图
+                    self.clear()
+        except Exception as e:
+            logger.error(f"删除任务失败：{e}")
 
 
 class TaskItemWidget(QWidget):
