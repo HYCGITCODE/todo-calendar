@@ -181,6 +181,7 @@ class MainWindow(QMainWindow):
         self.task_list = TaskListWidget(self.task_service)
         self.task_list.task_completed.connect(self._on_task_completed)
         self.task_list.task_edited.connect(self._edit_task)
+        self.task_list.task_deleted.connect(self._on_task_deleted)
         task_list_layout.addWidget(self.task_list, stretch=1)
         
         main_layout.addWidget(task_list_frame, stretch=1)
@@ -375,6 +376,12 @@ class MainWindow(QMainWindow):
             self.task_service.update_task(task_id, status=0, completed_at=None)
         self._refresh_task_list()
         self._update_stats()
+    
+    def _on_task_deleted(self, task_id: int):
+        """任务删除"""
+        self._refresh_task_list()
+        self._update_stats()
+        self.status_bar.showMessage(f"✓ 任务已删除", 2000)
     
     def _on_task_dropped(self, task_id: int, new_date):
         """任务拖拽到日期 - 更新任务日期"""

@@ -25,6 +25,7 @@ class TaskListWidget(QListWidget):
     
     task_completed = pyqtSignal(int, bool)  # task_id, completed
     task_edited = pyqtSignal(int)  # task_id
+    task_deleted = pyqtSignal(int)  # task_id
     task_dropped = pyqtSignal(int, object)  # task_id, new_date
     drag_started = pyqtSignal()  # 拖拽开始信号（用于视觉反馈）
     drag_cancelled = pyqtSignal()  # 拖拽取消信号
@@ -131,6 +132,9 @@ class TaskListWidget(QListWidget):
             
             # 删除任务
             if self.task_service.delete_task(task_id):
+                # 发送删除信号
+                self.task_deleted.emit(task_id)
+                
                 # 重新加载任务列表
                 if due_date:
                     self.load_tasks(self.task_service.get_tasks_by_date(due_date))
