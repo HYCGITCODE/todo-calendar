@@ -158,8 +158,9 @@ def check_database_connection() -> bool:
     """
     try:
         # 尝试连接数据库
+        from sqlalchemy import text
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
         logger.debug("数据库连接检查通过")
         return True
     except Exception as e:
