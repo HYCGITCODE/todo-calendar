@@ -182,6 +182,13 @@ class MainWindow(QMainWindow):
         self.task_list.task_completed.connect(self._on_task_completed)
         self.task_list.task_edited.connect(self._edit_task)
         self.task_list.task_deleted.connect(self._on_task_deleted)
+        self.task_list.tasks_bulk_deleted.connect(self._on_tasks_bulk_deleted)
+        
+        # 添加 Ctrl+A 全选快捷键
+        from PyQt6.QtGui import QShortcut, QKeySequence
+        select_all_shortcut = QShortcut(QKeySequence("Ctrl+A"), self.task_list)
+        select_all_shortcut.activated.connect(self.task_list.selectAll)
+        
         task_list_layout.addWidget(self.task_list, stretch=1)
         
         main_layout.addWidget(task_list_frame, stretch=1)
@@ -382,6 +389,12 @@ class MainWindow(QMainWindow):
         self._refresh_task_list()
         self._update_stats()
         self.status_bar.showMessage(f"✓ 任务已删除", 2000)
+    
+    def _on_tasks_bulk_deleted(self, task_ids: list):
+        """批量删除任务"""
+        self._refresh_task_list()
+        self._update_stats()
+        self.status_bar.showMessage(f"✓ 已删除 {len(task_ids)} 个任务", 3000)
     
     def _on_task_dropped(self, task_id: int, new_date):
         """任务拖拽到日期 - 更新任务日期"""

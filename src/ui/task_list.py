@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QListWidget, QListWidgetItem, QCheckBox, QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QMenu, QApplication, QGraphicsOpacityEffect
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QMimeData, QPoint, QPropertyAnimation, QEasingCurve
+from PyQt6.QtCore import Qt, pyqtSignal, QMimeData, QPoint, QPropertyAnimation, QEasingCurve, QDate
 from PyQt6.QtGui import QColor, QFont, QPalette, QDrag, QPixmap, QPainter, QCursor
 
 # 日志记录器
@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 class TaskListWidget(QListWidget):
-    """任务列表组件 - 支持拖拽修改日期"""
+    """任务列表组件 - 支持拖拽修改日期、批量操作"""
     
     task_completed = pyqtSignal(int, bool)  # task_id, completed
     task_edited = pyqtSignal(int)  # task_id
     task_deleted = pyqtSignal(int)  # task_id
+    tasks_bulk_deleted = pyqtSignal(list)  # [task_id]
     task_dropped = pyqtSignal(int, object)  # task_id, new_date
     drag_started = pyqtSignal()  # 拖拽开始信号（用于视觉反馈）
     drag_cancelled = pyqtSignal()  # 拖拽取消信号
@@ -48,27 +49,41 @@ class TaskListWidget(QListWidget):
         self._is_dragging = False
         self._dragged_item = None
         
-        # 设置样式
+        # 批量操作
+        self.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        self._selected_task_ids = []
+        
+        # 现代化样式
         self.setStyleSheet("""
             QListWidget {
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                padding: 5px;
-                background-color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 12px;
+                background-color: rgba(255, 255, 255, 0.95);
+                outline: none;
             }
             QListWidget::item {
-                padding: 8px;
-                border-bottom: 1px solid #f0f0f0;
+                padding: 12px 16px;
+                margin: 4px 0;
+                border-radius: 8px;
+                background-color: white;
+                border: 1px solid #e8e8e8;
             }
             QListWidget::item:selected {
                 background-color: #e3f2fd;
+                border: 2px solid #2196F3;
             }
             QListWidget::item:hover {
                 background-color: #f5f5f5;
+                border: 1px solid #2196F3;
             }
             QListWidget::item::drag-indicator {
                 background-color: #4CAF50;
-                height: 2px;
+                height: 3px;
+                border-radius: 2px;
+            }
+            QListWidget::item:selected:hover {
+                background-color: #bbdefb;
             }
         """)
     
@@ -109,22 +124,86 @@ class TaskListWidget(QListWidget):
     
     def _show_context_menu(self, pos):
         """显示右键菜单"""
-        item = self.itemAt(pos)
-        if item:
+        # 检查是否有多个选中项
+        selected_items = self.selectedItems()
+        
+        if len(selected_items) > 1:
+            # 批量操作菜单
+            menu = QMenu(self)
+            menu.setStyleSheet("""
+                QMenu {
+                    background-color: white;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 8px 0;
+                }
+                QMenu::item {
+                    padding: 10px 20px;
+                    margin: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 13px;
+                }
+                QMenu::item:selected {
+                    background-color: #2196F3;
+                    color: white;
+                }
+                QMenu::separator {
+                    height: 1px;
+                    background: #e0e0e0;
+                    margin: 4px 0;
+                }
+            """)
+            
+            bulk_delete_action = menu.addAction(f"🗑️ Delete Selected ({len(selected_items)} items)")
+            bulk_delete_action.triggered.connect(self._bulk_delete)
+            
+            menu.addSeparator()
+            
+            cancel_action = menu.addAction("Cancel")
+            cancel_action.triggered.connect(lambda: None)
+            
+            menu.exec(self.mapToGlobal(pos))
+        elif len(selected_items) == 1:
+            # 单个任务菜单
+            item = selected_items[0]
             widget = self.itemWidget(item)
             if widget and hasattr(widget, 'task'):
                 menu = QMenu(self)
+                menu.setStyleSheet("""
+                    QMenu {
+                        background-color: white;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        padding: 8px 0;
+                    }
+                    QMenu::item {
+                        padding: 10px 20px;
+                        margin: 2px 8px;
+                        border-radius: 4px;
+                        font-size: 13px;
+                    }
+                    QMenu::item:selected {
+                        background-color: #2196F3;
+                        color: white;
+                    }
+                """)
                 
-                edit_action = menu.addAction("Edit")
+                edit_action = menu.addAction("✏️ Edit")
                 edit_action.triggered.connect(lambda: self.task_edited.emit(widget.task.id))
                 
-                delete_action = menu.addAction("Delete")
+                delete_action = menu.addAction("🗑️ Delete")
                 delete_action.triggered.connect(lambda: self._delete_task(widget.task.id))
+                
+                menu.addSeparator()
+                
+                # 添加批量操作提示
+                select_all_action = menu.addAction("📋 Select All (Ctrl+A)")
+                select_all_action.triggered.connect(self.selectAll)
                 
                 menu.exec(self.mapToGlobal(pos))
     
     def _delete_task(self, task_id):
-        """删除任务"""
+        """删除单个任务"""
         try:
             # 先获取任务信息（在删除前）
             task = self.task_service.get_task(task_id)
@@ -143,6 +222,42 @@ class TaskListWidget(QListWidget):
                     self.clear()
         except Exception as e:
             logger.error(f"删除任务失败：{e}")
+    
+    def _bulk_delete(self):
+        """批量删除选中的任务"""
+        try:
+            selected_items = self.selectedItems()
+            if not selected_items:
+                return
+            
+            # 收集所有要删除的任务 ID
+            task_ids_to_delete = []
+            for item in selected_items:
+                widget = self.itemWidget(item)
+                if widget and hasattr(widget, 'task'):
+                    task_ids_to_delete.append(widget.task.id)
+            
+            if not task_ids_to_delete:
+                return
+            
+            # 批量删除
+            deleted_count = 0
+            for task_id in task_ids_to_delete:
+                if self.task_service.delete_task(task_id):
+                    deleted_count += 1
+            
+            # 发送批量删除信号
+            self.tasks_bulk_deleted.emit(task_ids_to_delete)
+            
+            # 刷新列表
+            self.load_tasks(self.task_service.get_tasks_by_date(
+                QDate.currentDate().toPyDate()
+            ))
+            
+            logger.info(f"批量删除完成：{deleted_count}/{len(task_ids_to_delete)} 个任务")
+            
+        except Exception as e:
+            logger.error(f"批量删除失败：{e}")
 
 
 class TaskItemWidget(QWidget):
