@@ -32,29 +32,98 @@ class SearchBar(QWidget):
         """初始化 UI"""
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(5)
+        layout.setSpacing(8)
         
         # 搜索输入框
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("🔍 Search tasks...")
-        self.search_input.setFixedHeight(32)
+        self.search_input.setFixedHeight(40)
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #e8e8e8;
+                border-radius: 12px;
+                padding: 10px 16px;
+                background-color: white;
+                font-size: 14px;
+                color: #333333;
+            }
+            QLineEdit:hover {
+                border-color: #bdbdbd;
+            }
+            QLineEdit:focus {
+                border: 2px solid #2196F3;
+                background-color: white;
+            }
+            QLineEdit::placeholder-text {
+                color: #999999;
+            }
+        """)
         self.search_input.textChanged.connect(self._on_search_changed)
         layout.addWidget(self.search_input, stretch=1)
         
         # 清除按钮
         self.clear_btn = QToolButton()
         self.clear_btn.setText("✕")
-        self.clear_btn.setFixedSize(32, 32)
+        self.clear_btn.setFixedSize(40, 40)
         self.clear_btn.setToolTip("Clear search")
+        self.clear_btn.setStyleSheet("""
+            QToolButton {
+                border: none;
+                border-radius: 20px;
+                background-color: #f5f5f5;
+                color: #666666;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QToolButton:hover {
+                background-color: #e0e0e0;
+                color: #333333;
+            }
+            QToolButton:pressed {
+                background-color: #d0d0d0;
+            }
+        """)
         self.clear_btn.clicked.connect(self._clear_search)
-        self.clear_btn.setVisible(False)  # 初始隐藏
+        self.clear_btn.setVisible(False)
         layout.addWidget(self.clear_btn)
         
         # 过滤按钮
         self.filter_btn = QToolButton()
         self.filter_btn.setText("⚙️ Filter")
-        self.filter_btn.setFixedHeight(32)
+        self.filter_btn.setFixedHeight(40)
+        self.filter_btn.setFixedWidth(100)
         self.filter_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.filter_btn.setStyleSheet("""
+            QToolButton {
+                border: 2px solid #e8e8e8;
+                border-radius: 12px;
+                background-color: white;
+                color: #333333;
+                font-size: 13px;
+                font-weight: 600;
+                padding: 0 16px;
+            }
+            QToolButton:hover {
+                border-color: #2196F3;
+                background-color: #f5f9ff;
+                color: #2196F3;
+            }
+            QToolButton:pressed {
+                background-color: #e3f2fd;
+            }
+            QToolButton::menu-button {
+                border: none;
+                width: 24px;
+                padding-right: 8px;
+            }
+            QToolButton::menu-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #666666;
+                margin-right: 4px;
+            }
+        """)
         # InstantPopup 模式会自动显示菜单，不需要连接 clicked 信号
         layout.addWidget(self.filter_btn)
         

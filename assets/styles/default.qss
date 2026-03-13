@@ -1,8 +1,9 @@
-/* Todo Calendar - 现代化全局样式表 v2.0 */
+/* Todo Calendar - 现代化全局样式表 v2.1 */
+/* 主题色：蓝色 (#2196F3) + 灰色系 */
 
 /* ========== 主窗口 ========== */
 QMainWindow {
-    background-color: #f5f7fa;
+    background-color: #f8f9fa;
 }
 
 /* ========== 菜单栏 ========== */

@@ -71,7 +71,8 @@ class CalendarView(QWidget):
         for i in range(7):
             self.calendar_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
         
-        # 连接双击信号
+        # 连接单击和双击信号
+        self.calendar_table.cellClicked.connect(self._on_cell_clicked)
         self.calendar_table.cellDoubleClicked.connect(self._on_cell_double_clicked)
         
         # 启用拖拽接受
@@ -182,6 +183,25 @@ class CalendarView(QWidget):
         self.year = year
         self.month = month
         self._render_calendar()
+    
+    def _on_cell_clicked(self, row: int, col: int):
+        """单击单元格事件 - 选择日期并加载任务"""
+        item = self.calendar_table.item(row, col)
+        if item:
+            text = item.text().strip()
+            # 检查是否是数字（日期）
+            if text.isdigit() or '\n' in text:
+                day_str = text.split('\n')[0]
+                if day_str.isdigit():
+                    day = int(day_str)
+                    # 判断是当月还是前后月（根据颜色判断）
+                    if item.foreground().color() == QColor("#CCCCCC"):
+                        # 前后月的日期，不处理
+                        return
+                    
+                    current_date = QDate(self.year, self.month, day)
+                    self.selected_date = current_date
+                    self.date_selected.emit(current_date)
     
     def _on_cell_double_clicked(self, row: int, col: int):
         """双击单元格事件 - 创建任务"""
