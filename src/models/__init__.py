@@ -8,5 +8,6 @@ from src.models.base import Base
 from src.models.task import Task
 from src.models.category import Category
 from src.models.recurring_task import RecurringTask, RecurrenceType
+from src.models.reminder import Reminder
 
-__all__ = ['Base', 'Task', 'Category', 'RecurringTask', 'RecurrenceType']
+__all__ = ['Base', 'Task', 'Category', 'RecurringTask', 'RecurrenceType', 'Reminder']

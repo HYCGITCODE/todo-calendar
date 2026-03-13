@@ -25,6 +25,7 @@ class Task(Base):
     completed_at = Column(DateTime, comment='完成时间')
     
     category = relationship("Category", back_populates="tasks")
+    reminders = relationship("Reminder", back_populates="task", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Task(id={self.id}, title='{self.title}', status={self.status})>"

@@ -2,7 +2,7 @@
 重复任务数据模型
 """
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime, date
 from enum import IntEnum
@@ -46,8 +46,8 @@ class RecurringTask(Base):
     
     # 状态
     is_active = Column(Boolean, default=True, comment='是否激活')
-    created_at = Column(String, default=datetime.now, comment='创建时间')
-    updated_at = Column(String, default=datetime.now, comment='更新时间')
+    created_at = Column(DateTime, default=datetime.now, comment='创建时间')
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, comment='更新时间')
     
     def __repr__(self):
         return f"<RecurringTask(id={self.id}, title='{self.title}', type={self.recurrence_type})>"
