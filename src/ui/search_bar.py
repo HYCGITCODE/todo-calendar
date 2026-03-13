@@ -55,7 +55,7 @@ class SearchBar(QWidget):
         self.filter_btn.setText("⚙️ Filter")
         self.filter_btn.setFixedHeight(32)
         self.filter_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        self.filter_btn.clicked.connect(self._show_filter_menu)
+        # InstantPopup 模式会自动显示菜单，不需要连接 clicked 信号
         layout.addWidget(self.filter_btn)
         
         # 创建过滤菜单
