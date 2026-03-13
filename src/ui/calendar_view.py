@@ -39,6 +39,7 @@ class CalendarView(QWidget):
         
         self.prev_btn = QPushButton("◄")
         self.prev_btn.setFixedSize(40, 30)
+        self.prev_btn.setToolTip("上个月")
         self.prev_btn.clicked.connect(self._prev_month)
         nav_layout.addWidget(self.prev_btn)
         
@@ -49,6 +50,7 @@ class CalendarView(QWidget):
         
         self.next_btn = QPushButton("►")
         self.next_btn.setFixedSize(40, 30)
+        self.next_btn.setToolTip("下个月")
         self.next_btn.clicked.connect(self._next_month)
         nav_layout.addWidget(self.next_btn)
         
@@ -64,7 +66,7 @@ class CalendarView(QWidget):
         self.calendar_table.horizontalHeader().setStretchLastSection(True)
         
         # 设置列标题 (周一到周日)
-        headers = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        headers = ["一", "二", "三", "四", "五", "六", "日"]
         self.calendar_table.setHorizontalHeaderLabels(headers)
         
         # 设置列宽相等

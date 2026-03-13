@@ -36,7 +36,8 @@ class SearchBar(QWidget):
         
         # 搜索输入框
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search tasks...")
+        self.search_input.setPlaceholderText("🔍 搜索任务...")
+        self.search_input.setObjectName("searchInput")
         self.search_input.setFixedHeight(40)
         self.search_input.setStyleSheet("""
             QLineEdit {
@@ -65,7 +66,8 @@ class SearchBar(QWidget):
         self.clear_btn = QToolButton()
         self.clear_btn.setText("✕")
         self.clear_btn.setFixedSize(40, 40)
-        self.clear_btn.setToolTip("Clear search")
+        self.clear_btn.setToolTip("清除搜索")
+        self.clear_btn.setObjectName("clearBtn")
         self.clear_btn.setStyleSheet("""
             QToolButton {
                 border: none;
@@ -89,9 +91,10 @@ class SearchBar(QWidget):
         
         # 过滤按钮
         self.filter_btn = QToolButton()
-        self.filter_btn.setText("⚙️ Filter")
+        self.filter_btn.setText("⚙️ 筛选")
         self.filter_btn.setFixedHeight(40)
         self.filter_btn.setFixedWidth(100)
+        self.filter_btn.setObjectName("filterBtn")
         self.filter_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.filter_btn.setStyleSheet("""
             QToolButton {
@@ -136,12 +139,12 @@ class SearchBar(QWidget):
         self.filter_btn.setMenu(self.filter_menu)
         
         # 状态过滤
-        status_menu = self.filter_menu.addMenu("📊 Status")
+        status_menu = self.filter_menu.addMenu("📊 状态")
         self.status_actions = {
-            None: status_menu.addAction("All"),
-            0: status_menu.addAction("⏳ Pending"),
-            1: status_menu.addAction("🔄 In Progress"),
-            2: status_menu.addAction("✅ Completed")
+            None: status_menu.addAction("全部"),
+            0: status_menu.addAction("⏳ 待处理"),
+            1: status_menu.addAction("🔄 进行中"),
+            2: status_menu.addAction("✅ 已完成")
         }
         
         for status, action in self.status_actions.items():
@@ -153,12 +156,12 @@ class SearchBar(QWidget):
             )
         
         # 优先级过滤
-        priority_menu = self.filter_menu.addMenu("🎯 Priority")
+        priority_menu = self.filter_menu.addMenu("🎯 优先级")
         self.priority_actions = {
-            None: priority_menu.addAction("All"),
-            3: priority_menu.addAction("🔴 High"),
-            2: priority_menu.addAction("🟡 Medium"),
-            1: priority_menu.addAction("🔵 Low")
+            None: priority_menu.addAction("全部"),
+            3: priority_menu.addAction("🔴 高"),
+            2: priority_menu.addAction("🟡 中"),
+            1: priority_menu.addAction("🔵 低")
         }
         
         for priority, action in self.priority_actions.items():
@@ -170,11 +173,11 @@ class SearchBar(QWidget):
             )
         
         # 分类过滤 (动态加载)
-        self.category_menu = self.filter_menu.addMenu("📁 Category")
+        self.category_menu = self.filter_menu.addMenu("📁 分类")
         self.category_actions = {}
         
         # 重置过滤
-        reset_action = self.filter_menu.addAction("🔄 Reset Filters")
+        reset_action = self.filter_menu.addAction("🔄 重置筛选")
         reset_action.triggered.connect(self._reset_filters)
     
     def _on_search_changed(self, text: str):
@@ -263,7 +266,7 @@ class SearchBar(QWidget):
         self.category_actions = {}
         
         # 添加"全部"选项
-        all_action = self.category_menu.addAction("📋 All")
+        all_action = self.category_menu.addAction("📋 全部")
         all_action.setCheckable(True)
         all_action.setChecked(True)
         all_action.triggered.connect(

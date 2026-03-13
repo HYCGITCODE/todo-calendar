@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
     
     def _init_ui(self):
         """初始化用户界面"""
-        self.setWindowTitle("Todo Calendar - Phase 2")
+        self.setWindowTitle("Todo Calendar - 待办日历")
         self.setGeometry(100, 100, 1400, 900)
         
         # 创建中央部件
@@ -87,17 +87,27 @@ class MainWindow(QMainWindow):
         view_btn_layout = QHBoxLayout()
         view_btn_layout.setSpacing(5)
         
-        self.month_view_btn = QPushButton("📅 Month")
-        self.month_view_btn.setFixedHeight(32)
+        self.month_view_btn = QPushButton("📅 月")
+        self.month_view_btn.setObjectName("viewBtn")
+        self.month_view_btn.setCheckable(True)
+        self.month_view_btn.setChecked(True)
+        self.month_view_btn.setFixedHeight(36)
         self.month_view_btn.clicked.connect(lambda: self._switch_view("month"))
         view_btn_layout.addWidget(self.month_view_btn)
         
-        self.week_view_btn = QPushButton("📆 Week")
-        self.week_view_btn.setFixedHeight(32)
+        self.week_view_btn = QPushButton("📆 周")
+        self.week_view_btn.setObjectName("viewBtn")
+        self.week_view_btn.setCheckable(True)
+        self.week_view_btn.setFixedHeight(36)
         self.week_view_btn.clicked.connect(lambda: self._switch_view("week"))
         view_btn_layout.addWidget(self.week_view_btn)
         
-        self.day_view_btn = QPushButton("📋 Day")
+        self.day_view_btn = QPushButton("📋 日")
+        self.day_view_btn.setObjectName("viewBtn")
+        self.day_view_btn.setCheckable(True)
+        self.day_view_btn.setFixedHeight(36)
+        self.day_view_btn.clicked.connect(lambda: self._switch_view("day"))
+        view_btn_layout.addWidget(self.day_view_btn)
         self.day_view_btn.setFixedHeight(32)
         self.day_view_btn.clicked.connect(lambda: self._switch_view("day"))
         view_btn_layout.addWidget(self.day_view_btn)
@@ -165,13 +175,13 @@ class MainWindow(QMainWindow):
         
         # 任务列表标题栏
         title_layout = QHBoxLayout()
-        self.task_count_label = QLabel("Today's Tasks")
+        self.task_count_label = QLabel("今日任务")
         self.task_count_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         title_layout.addWidget(self.task_count_label)
         
         title_layout.addStretch()
         
-        self.add_task_btn = QPushButton("+ Add Task")
+        self.add_task_btn = QPushButton("+ 新建任务")
         self.add_task_btn.clicked.connect(self._add_task)
         title_layout.addWidget(self.add_task_btn)
         
@@ -262,7 +272,7 @@ class MainWindow(QMainWindow):
         """更新状态栏信息"""
         stats = self.task_service.get_task_count_by_status()
         self.status_bar.showMessage(
-            f"Tasks: {stats['total']} | Completed: {stats['completed']} | Pending: {stats['pending']}"
+            f"任务：{stats['total']} | 已完成：{stats['completed']} | 待处理：{stats['pending']}"
         )
     
     def _load_data(self):
