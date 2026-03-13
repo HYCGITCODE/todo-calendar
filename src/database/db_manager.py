@@ -6,7 +6,7 @@
 
 import os
 import logging
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError
 from contextlib import contextmanager
@@ -159,7 +159,9 @@ def check_database_connection() -> bool:
     try:
         # 尝试连接数据库
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            # 使用 select(1) 而不是 text()，更符合 SQLAlchemy 2.0 规范
+            from sqlalchemy import select
+            conn.execute(select(1))
         logger.debug("数据库连接检查通过")
         return True
     except Exception as e:
