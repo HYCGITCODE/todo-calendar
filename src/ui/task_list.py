@@ -56,34 +56,34 @@ class TaskListWidget(QListWidget):
         # 现代化样式
         self.setStyleSheet("""
             QListWidget {
-                border: none;
+                border: 1px solid #E5E7EB;
                 border-radius: 12px;
                 padding: 12px;
-                background-color: rgba(255, 255, 255, 0.95);
+                background-color: #FFFFFF;
                 outline: none;
             }
             QListWidget::item {
-                padding: 12px 16px;
-                margin: 4px 0;
+                padding: 14px 16px;
+                margin: 6px 0;
                 border-radius: 8px;
-                background-color: white;
-                border: 1px solid #e8e8e8;
+                background-color: #FFFFFF;
+                border: 1px solid #E5E7EB;
             }
             QListWidget::item:selected {
-                background-color: #e3f2fd;
-                border: 2px solid #2196F3;
+                background-color: #DBEAFE;
+                border: 2px solid #3B82F6;
             }
             QListWidget::item:hover {
-                background-color: #f5f5f5;
-                border: 1px solid #2196F3;
+                background-color: #F9FAFB;
+                border: 1px solid #3B82F6;
             }
             QListWidget::item::drag-indicator {
-                background-color: #4CAF50;
+                background-color: #3B82F6;
                 height: 3px;
                 border-radius: 2px;
             }
             QListWidget::item:selected:hover {
-                background-color: #bbdefb;
+                background-color: #BFDBFE;
             }
         """)
     
@@ -154,12 +154,12 @@ class TaskListWidget(QListWidget):
                 }
             """)
             
-            bulk_delete_action = menu.addAction(f"🗑️ Delete Selected ({len(selected_items)} items)")
+            bulk_delete_action = menu.addAction(f"🗑️ 删除选中 ({len(selected_items)} 个)")
             bulk_delete_action.triggered.connect(self._bulk_delete)
             
             menu.addSeparator()
             
-            cancel_action = menu.addAction("Cancel")
+            cancel_action = menu.addAction("取消")
             cancel_action.triggered.connect(lambda: None)
             
             menu.exec(self.mapToGlobal(pos))
@@ -171,8 +171,8 @@ class TaskListWidget(QListWidget):
                 menu = QMenu(self)
                 menu.setStyleSheet("""
                     QMenu {
-                        background-color: white;
-                        border: 1px solid #ddd;
+                        background-color: #FFFFFF;
+                        border: 1px solid #E5E7EB;
                         border-radius: 8px;
                         padding: 8px 0;
                     }
@@ -183,21 +183,21 @@ class TaskListWidget(QListWidget):
                         font-size: 13px;
                     }
                     QMenu::item:selected {
-                        background-color: #2196F3;
-                        color: white;
+                        background-color: #3B82F6;
+                        color: #FFFFFF;
                     }
                 """)
                 
-                edit_action = menu.addAction("✏️ Edit")
+                edit_action = menu.addAction("✏️ 编辑")
                 edit_action.triggered.connect(lambda: self.task_edited.emit(widget.task.id))
                 
-                delete_action = menu.addAction("🗑️ Delete")
+                delete_action = menu.addAction("🗑️ 删除")
                 delete_action.triggered.connect(lambda: self._delete_task(widget.task.id))
                 
                 menu.addSeparator()
                 
                 # 添加批量操作提示
-                select_all_action = menu.addAction("📋 Select All (Ctrl+A)")
+                select_all_action = menu.addAction("📋 全选 (Ctrl+A)")
                 select_all_action.triggered.connect(self.selectAll)
                 
                 menu.exec(self.mapToGlobal(pos))
@@ -261,92 +261,129 @@ class TaskListWidget(QListWidget):
 
 
 class TaskItemWidget(QWidget):
-    """单个任务项组件 - 支持优先级颜色编码和拖拽"""
+    """单个任务项组件 - 现代简约设计"""
     
     def __init__(self, task):
         super().__init__()
         self.task = task
         self.drag_start_position = QPoint()
         self._is_dragging = False
-        self._original_opacity = 1.0
-        self._drag_cursor = None
         
-        # 优先级颜色配置 (P0 红/P1 黄/P2 绿)
-        self.priority_colors = {
-            3: {'bg': '#FEE2E2', 'border': '#EF4444', 'text': '#EF4444'},  # P0 高
-            2: {'bg': '#FEF3C7', 'border': '#F59E0B', 'text': '#F59E0B'},  # P1 中
-            1: {'bg': '#D1FAE5', 'border': '#10B981', 'text': '#10B981'},  # P2 低
-        }
-        
-        # 设置背景色和左边框
-        colors = self.priority_colors.get(task.priority, self.priority_colors[1])
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {colors['bg']};
-                border-left: 4px solid {colors['border']};
-                border-radius: 4px;
-                margin: 2px;
-            }}
-            QWidget:hover {{
-                background-color: {self._lighten_color(colors['bg'], 20)};
-                border-left: 4px solid {colors['border']};
-            }}
-            QWidget[dragging="true"] {{
-                background-color: {colors['bg']};
-                opacity: 0.5;
-                border: 2px dashed {colors['border']};
-            }}
+        # 设置简洁样式 - 白色背景，无边框
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #FFFFFF;
+                border: none;
+                border-radius: 8px;
+            }
+            QWidget:hover {
+                background-color: #F9FAFB;
+            }
+            QWidget[dragging="true"] {
+                background-color: #F3F4F6;
+                opacity: 0.6;
+            }
         """)
         
         # 设置拖拽属性
         self.setProperty('dragging', 'false')
         
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(12)
         
         # 复选框
         self.checkbox = QCheckBox()
         self.checkbox.setChecked(task.status == 2)
+        self.checkbox.setStyleSheet("""
+            QCheckBox {
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 5px;
+                border: 2px solid #E5E7EB;
+                background-color: #FFFFFF;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #3B82F6;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #3B82F6;
+                border-color: #3B82F6;
+            }
+        """)
         layout.addWidget(self.checkbox)
         
         # 任务信息
         info_layout = QVBoxLayout()
+        info_layout.setSpacing(6)
+        
+        # 标题行
+        title_layout = QHBoxLayout()
+        title_layout.setSpacing(8)
+        
+        # 优先级标记
+        priority_dot = QLabel("●")
+        priority_colors = {3: "#EF4444", 2: "#F59E0B", 1: "#10B981"}
+        priority_dot.setStyleSheet(f"""
+            color: {priority_colors.get(task.priority, '#10B981')};
+            font-size: 12px;
+            font-weight: bold;
+        """)
+        title_layout.addWidget(priority_dot)
         
         # 标题
         title_label = QLabel(task.title)
-        title_label.setFont(QFont("Arial", 11, QFont.Weight.Bold if task.priority == 3 else QFont.Weight.Normal))
+        title_label.setFont(QFont("Microsoft YaHei", 13, QFont.Weight.Medium))
+        title_label.setStyleSheet("color: #1F2937;")
+        title_label.setWordWrap(True)
         
         if task.status == 2:
             # 已完成：删除线 + 灰色
-            title_label.setStyleSheet("color: #999; text-decoration: line-through;")
-        else:
-            # 未完成：根据优先级显示颜色
-            title_label.setStyleSheet(f"color: {colors['text']};")
+            title_label.setStyleSheet("color: #9CA3AF; text-decoration: line-through;")
         
-        info_layout.addWidget(title_label)
+        title_layout.addWidget(title_label, stretch=1)
+        info_layout.addLayout(title_layout)
         
         # 描述 (如果有)
         if task.description:
-            desc_label = QLabel(task.description[:50] + "..." if len(task.description) > 50 else task.description)
-            desc_label.setStyleSheet("color: #666; font-size: 10px;")
+            desc_label = QLabel(task.description[:80] + ("..." if len(task.description) > 80 else ""))
+            desc_label.setFont(QFont("Microsoft YaHei", 12))
+            desc_label.setStyleSheet("color: #6B7280;")
+            desc_label.setWordWrap(True)
             info_layout.addWidget(desc_label)
         
-        # 分类和优先级
+        # 元信息行
         meta_layout = QHBoxLayout()
+        meta_layout.setSpacing(12)
         
-        # 优先级标签
+        # 日期
+        date_label = QLabel(f"📅 {task.due_date.strftime('%Y-%m-%d')}")
+        date_label.setStyleSheet("color: #9CA3AF; font-size: 11px;")
+        meta_layout.addWidget(date_label)
+        
+        # 优先级
         priority_text = {3: "P0 高", 2: "P1 中", 1: "P2 低"}
-        priority_label = QLabel(f"● {priority_text.get(task.priority, 'P2 低')}")
-        priority_label.setStyleSheet(f"color: {colors['text']}; font-size: 10px; font-weight: bold;")
+        priority_label = QLabel(f"{priority_text.get(task.priority, 'P2 低')}")
+        priority_label.setStyleSheet(f"""
+            color: {priority_colors.get(task.priority, '#10B981')};
+            font-size: 11px;
+            font-weight: 500;
+        """)
         meta_layout.addWidget(priority_label)
         
         # 分类 (如果有)
         if task.category:
             category_label = QLabel(f"{task.category.icon} {task.category.name}")
-            category_label.setStyleSheet(f"color: {task.category.color}; font-size: 10px;")
+            category_label.setStyleSheet("color: #6B7280; font-size: 11px;")
             meta_layout.addWidget(category_label)
         
         meta_layout.addStretch()
+        info_layout.addLayout(meta_layout)
+        
+        layout.addLayout(info_layout, stretch=1)
         info_layout.addLayout(meta_layout)
         
         layout.addLayout(info_layout, stretch=1)

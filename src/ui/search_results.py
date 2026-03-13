@@ -1,13 +1,13 @@
 """
-搜索结果面板 - 现代化简约设计
+搜索结果面板 - 现代简约设计
 """
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
-    QScrollArea, QPushButton
+    QScrollArea, QPushButton, QGraphicsOpacityEffect
 )
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
+from PyQt6.QtGui import QFont, QColor
 
 
 class SearchResultsPanel(QWidget):
@@ -20,20 +20,22 @@ class SearchResultsPanel(QWidget):
         super().__init__()
         
         self.setFixedWidth(400)
+        self.setMaximumHeight(500)
         self.setVisible(False)
         self._init_ui()
     
     def _init_ui(self):
         """初始化 UI"""
+        self.setObjectName("searchResultsPanel")
+        
         # 设置现代化样式
         self.setStyleSheet("""
             QWidget#searchResultsPanel {
-                background-color: white;
-                border: 1px solid #e0e0e0;
+                background-color: #FFFFFF;
+                border: 1px solid #E5E7EB;
                 border-radius: 12px;
             }
         """)
-        self.setObjectName("searchResultsPanel")
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -43,9 +45,9 @@ class SearchResultsPanel(QWidget):
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(16, 12, 16, 12)
         
-        self.title_label = QLabel("🔍 Search Results")
-        self.title_label.setFont(QFont("Arial", 13, QFont.Weight.Bold))
-        self.title_label.setStyleSheet("color: #333333;")
+        self.title_label = QLabel("🔍 搜索结果")
+        self.title_label.setFont(QFont("Microsoft YaHei", 13, QFont.Weight.Bold))
+        self.title_label.setStyleSheet("color: #1F2937;")
         header_layout.addWidget(self.title_label)
         
         header_layout.addStretch()
@@ -53,25 +55,25 @@ class SearchResultsPanel(QWidget):
         # 清除按钮
         self.clear_btn = QPushButton("✕")
         self.clear_btn.setFixedSize(28, 28)
-        self.clear_btn.setToolTip("Close search results")
+        self.clear_btn.setToolTip("关闭搜索结果")
         self.clear_btn.setStyleSheet("""
             QPushButton {
                 border: none;
                 border-radius: 14px;
-                background-color: #f5f5f5;
-                color: #666666;
+                background-color: #F3F4F6;
+                color: #6B7280;
                 font-size: 14px;
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #e0e0e0;
-                color: #333333;
+                background-color: #E5E7EB;
+                color: #1F2937;
             }
             QPushButton:pressed {
-                background-color: #d0d0d0;
+                background-color: #D1D5DB;
             }
         """)
-        self.clear_btn.clicked.connect(self.clear_search.emit)
+        self.clear_btn.clicked.connect(lambda: self.clear_search.emit())
         header_layout.addWidget(self.clear_btn)
         
         layout.addLayout(header_layout)
@@ -79,7 +81,7 @@ class SearchResultsPanel(QWidget):
         # 分隔线
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.HLine)
-        separator.setStyleSheet("background-color: #e8e8e8; max-height: 1px;")
+        separator.setStyleSheet("background-color: #E5E7EB; max-height: 1px;")
         layout.addWidget(separator)
         
         # 滚动区域
@@ -89,21 +91,21 @@ class SearchResultsPanel(QWidget):
         self.scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
-                background-color: white;
+                background-color: #FFFFFF;
             }
             QScrollBar:vertical {
-                background-color: #f5f5f5;
+                background-color: #F3F4F6;
                 width: 8px;
                 border-radius: 4px;
                 margin: 0;
             }
             QScrollBar::handle:vertical {
-                background-color: #bdbdbd;
+                background-color: #D1D5DB;
                 border-radius: 4px;
                 min-height: 20px;
             }
             QScrollBar::handle:vertical:hover {
-                background-color: #9e9e9e;
+                background-color: #9CA3AF;
             }
         """)
         
@@ -118,10 +120,10 @@ class SearchResultsPanel(QWidget):
         layout.addWidget(self.scroll_area)
         
         # 空状态提示
-        self.empty_label = QLabel("No results found")
+        self.empty_label = QLabel("暂无搜索结果")
         self.empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.empty_label.setStyleSheet("""
-            color: #999999;
+            color: #9CA3AF;
             font-size: 14px;
             padding: 40px;
         """)
@@ -134,10 +136,10 @@ class SearchResultsPanel(QWidget):
         
         if not tasks:
             self.empty_label.setVisible(True)
-            self.title_label.setText(f"🔍 Search Results (0)")
+            self.title_label.setText(f"🔍 搜索结果 (0)")
         else:
             self.empty_label.setVisible(False)
-            self.title_label.setText(f"🔍 Search Results ({len(tasks)})")
+            self.title_label.setText(f"🔍 搜索结果 ({len(tasks)})")
             
             # 添加搜索结果项
             for task in tasks:
@@ -150,19 +152,19 @@ class SearchResultsPanel(QWidget):
         item_widget = QWidget()
         item_widget.setStyleSheet("""
             QWidget {
-                background-color: white;
-                border: 1px solid #e8e8e8;
+                background-color: #FFFFFF;
+                border: 1px solid #E5E7EB;
                 border-radius: 8px;
             }
             QWidget:hover {
-                background-color: #f5f9ff;
-                border: 1px solid #2196F3;
+                background-color: #F9FAFB;
+                border: 1px solid #3B82F6;
             }
         """)
         
         layout = QVBoxLayout(item_widget)
-        layout.setContentsMargins(12, 12, 12, 12)
-        layout.setSpacing(6)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(8)
         
         # 标题行
         title_layout = QHBoxLayout()
@@ -174,15 +176,15 @@ class SearchResultsPanel(QWidget):
         priority_text = {3: "P0", 2: "P1", 1: "P2"}
         priority_dot.setStyleSheet(f"""
             color: {priority_colors.get(task.priority, '#10B981')};
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
         """)
         title_layout.addWidget(priority_dot)
         
         # 任务标题
         title_label = QLabel(task.title)
-        title_label.setFont(QFont("Arial", 13, QFont.Weight.Medium))
-        title_label.setStyleSheet("color: #333333;")
+        title_label.setFont(QFont("Microsoft YaHei", 13, QFont.Weight.Medium))
+        title_label.setStyleSheet("color: #1F2937;")
         title_label.setWordWrap(True)
         title_layout.addWidget(title_label, stretch=1)
         
@@ -192,7 +194,7 @@ class SearchResultsPanel(QWidget):
         if task.description:
             desc_label = QLabel(task.description[:80] + ("..." if len(task.description) > 80 else ""))
             desc_label.setStyleSheet("""
-                color: #666666;
+                color: #6B7280;
                 font-size: 12px;
             """)
             desc_label.setWordWrap(True)
@@ -205,15 +207,15 @@ class SearchResultsPanel(QWidget):
         # 日期
         date_label = QLabel(f"📅 {task.due_date.strftime('%Y-%m-%d')}")
         date_label.setStyleSheet("""
-            color: #999999;
+            color: #9CA3AF;
             font-size: 11px;
         """)
         meta_layout.addWidget(date_label)
         
         # 状态
         status_colors = {0: "#F59E0B", 1: "#3B82F6", 2: "#10B981"}
-        status_text = {0: "Pending", 1: "In Progress", 2: "Completed"}
-        status_label = QLabel(f"● {status_text.get(task.status, 'Pending')}")
+        status_text = {0: "待处理", 1: "进行中", 2: "已完成"}
+        status_label = QLabel(f"● {status_text.get(task.status, '待处理')}")
         status_label.setStyleSheet(f"""
             color: {status_colors.get(task.status, '#F59E0B')};
             font-size: 11px;
@@ -225,7 +227,7 @@ class SearchResultsPanel(QWidget):
         if task.category:
             category_label = QLabel(f"{task.category.icon} {task.category.name}")
             category_label.setStyleSheet("""
-                color: #666666;
+                color: #6B7280;
                 font-size: 11px;
             """)
             meta_layout.addWidget(category_label)
@@ -237,11 +239,11 @@ class SearchResultsPanel(QWidget):
         self.content_layout.insertWidget(self.content_layout.count() - 1, item_widget)
         
         # 点击事件
-        from PyQt6.QtWidgets import QGraphicsOpacityEffect
-        from PyQt6.QtCore import QPropertyAnimation
-        
         item_widget.mousePressEvent = lambda e: self._on_item_clicked(task.id)
         item_widget.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        # 悬停效果
+        self._add_hover_effect(item_widget)
     
     def _on_item_clicked(self, task_id: int):
         """点击结果项"""
@@ -250,9 +252,26 @@ class SearchResultsPanel(QWidget):
     
     def _clear_content(self):
         """清空内容"""
-        while self.content_layout.count() > 1:  # 保留最后的 stretch
+        while self.content_layout.count() > 1:
             item = self.content_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
         
         self.empty_label.setVisible(False)
+    
+    def _add_hover_effect(self, widget):
+        """添加悬停效果"""
+        effect = QGraphicsOpacityEffect()
+        effect.setOpacity(1.0)
+        widget.setGraphicsEffect(effect)
+        
+        widget.enterEvent = lambda e: self._on_hover_enter(widget)
+        widget.leaveEvent = lambda e: self._on_hover_leave(widget)
+    
+    def _on_hover_enter(self, widget):
+        """鼠标进入"""
+        pass  # 通过样式表处理
+    
+    def _on_hover_leave(self, widget):
+        """鼠标离开"""
+        pass
