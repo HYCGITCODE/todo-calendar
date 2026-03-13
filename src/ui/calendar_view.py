@@ -118,27 +118,38 @@ class CalendarView(QWidget):
         # 填充当月日期
         for day in range(1, days_in_month + 1):
             current_date = QDate(self.year, self.month, day)
-            item = QTableWidgetItem(str(day))
             
             # 获取当天任务数
             tasks = self.task_service.get_tasks_by_date(current_date.toPyDate())
-            if tasks:
-                item.setText(f"{day}\n({len(tasks)})")
+            task_count = len(tasks)
+            
+            # 创建日期文本
+            if task_count > 0:
+                date_text = f"{day}\n({task_count}条)"
+            else:
+                date_text = str(day)
+            
+            item = QTableWidgetItem(date_text)
             
             # 标记今天
             if current_date == QDate.currentDate():
-                item.setBackground(QColor("#3498db"))
+                item.setBackground(QColor("#3B82F6"))
                 item.setForeground(QColor("#FFFFFF"))
-                item.setFont(QFont("Arial", 10, QFont.Weight.Bold))
+                item.setFont(QFont("Microsoft YaHei", 10, QFont.Weight.Bold))
+            else:
+                # 标记选中日期
+                if current_date == self.selected_date:
+                    item.setBackground(QColor("#DBEAFE"))
+                    item.setForeground(QColor("#1E40AF"))
+                
+                # 标记周末
+                if current_date.dayOfWeek() >= 6:
+                    item.setForeground(QColor("#EF4444"))
+                else:
+                    item.setForeground(QColor("#1F2937"))
             
-            # 标记选中日期
-            if current_date == self.selected_date:
-                item.setBackground(QColor("#2980b9"))
-            
-            # 标记周末
-            if current_date.dayOfWeek() >= 6:
-                if current_date != QDate.currentDate():
-                    item.setForeground(QColor("#e74c3c"))
+            # 设置对齐方式
+            item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
             
             self.calendar_table.setItem(current_row, current_col, item)
             
